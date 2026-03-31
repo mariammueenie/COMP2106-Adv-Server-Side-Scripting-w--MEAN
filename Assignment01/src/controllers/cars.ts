@@ -1,15 +1,6 @@
-// .\controllers\cars.ts as opposed to
-// .\models\car.ts , since latter models 1 car,
-// while former controls many cars (CRUD operations on collection of cars)
-
+// Tighten controller so it matches newer model
 import { Request, Response } from "express";
 import Car from "../models/car";
-
-/**
- * NOTE:
- * These Swagger blocks are what build your docs at /api-docs.
- * You can keep them above each route handler like this.
- */
 
 /**
  * @swagger
@@ -19,13 +10,8 @@ import Car from "../models/car";
  */
 
 /**
- * CREATE - POST /api/cars
- * Adds a new car to MongoDB.
- */
-
-/**
  * @swagger
- * /api/cars:
+ * /api/v1/cars:
  *   post:
  *     summary: Create a new car
  *     tags: [Cars]
@@ -35,60 +21,103 @@ import Car from "../models/car";
  *         application/json:
  *           schema:
  *             type: object
- *             required: [make, model, year]
+ *             required:
+ *               - make
+ *               - model
+ *               - year
+ *               - price
+ *               - fuelType
  *             properties:
- *               make: { type: string, example: Toyota }
- *               model: { type: string, example: Corolla }
- *               year: { type: integer, example: 2020 }
+ *               make:
+ *                 type: string
+ *                 example: Toyota
+ *               model:
+ *                 type: string
+ *                 example: Corolla
+ *               year:
+ *                 type: integer
+ *                 example: 2022
+ *               price:
+ *                 type: number
+ *                 example: 24000
+ *               fuelType:
+ *                 type: string
+ *                 example: Gasoline
  *     responses:
- *       201: { description: Created }
- *       400: { description: Validation error }
+ *       201:
+ *         description: Car created
+ *       400:
+ *         description: Validation error
  */
 export const createCar = async (req: Request, res: Response) => {
   try {
-    // Car.create() validates against the schema rules in models/car.ts
-    const created = await Car.create(req.body);
+    // create a new car directly from the request body
+    const createdCar = await Car.create(req.body);
 
-    // 201 = Created
-    return res.status(201).json(created);
-  } catch (err) {
-    // Bad input (missing make/model/year, invalid year, etc.)
-    return res.status(400).json({ error: "Create failed", details: err });
+    return res.status(201).json(createdCar);
+  } catch (error) {
+    return res.status(400).json({
+      error: "Create failed",
+      details: error
+    });
   }
 };
 
 /**
- * READ ALL - GET /api/cars
- * Returns a list of all cars.
- */
-
-/**
  * @swagger
- * /api/cars:
+ * /api/v1/cars:
  *   get:
  *     summary: Get all cars
  *     tags: [Cars]
+ *     parameters:
+ *       - in: query
+ *         name: make
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: fuelType
+ *         required: false
+ *         schema:
+ *           type: string
  *     responses:
- *       200: { description: OK }
+ *       200:
+ *         description: List of cars
+ *       404:
+ *         description: No cars found
  */
-export const getCars = async (_req: Request, res: Response) => {
+export const getCars = async (req: Request, res: Response) => {
   try {
-    // Find all cars, newest first (optional but nice)
-    const cars = await Car.find().sort({ createdAt: -1 });
+    // build a simple filter object from optional query string values
+    const filter: Record<string, string> = {};
+
+    if (typeof req.query.make === "string") {
+      filter.make = req.query.make;
+    }
+
+    if (typeof req.query.fuelType === "string") {
+      filter.fuelType = req.query.fuelType;
+    }
+
+    // newest first makes the list feel a bit nicer when testing
+    const cars = await Car.find(filter).sort({ createdAt: -1 });
+
+    if (cars.length === 0) {
+      return res.status(404).json({ error: "No cars found" });
+    }
+
     return res.status(200).json(cars);
-  } catch (err) {
-    return res.status(500).json({ error: "Fetch failed", details: err });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Fetch failed",
+      details: error
+    });
   }
 };
 
 /**
- * READ ONE - GET /api/cars/:id
- * Returns one car by MongoDB ObjectId.
- */
-
-/**
  * @swagger
- * /api/cars/{id}:
+ * /api/v1/cars/{id}:
  *   get:
  *     summary: Get one car by id
  *     tags: [Cars]
@@ -96,34 +125,38 @@ export const getCars = async (_req: Request, res: Response) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *         description: MongoDB ObjectId
  *     responses:
- *       200: { description: OK }
- *       404: { description: Not found }
+ *       200:
+ *         description: Car found
+ *       404:
+ *         description: Car not found
+ *       400:
+ *         description: Invalid id
  */
 export const getCarById = async (req: Request, res: Response) => {
   try {
+    // look up a single car using the id from the url
     const car = await Car.findById(req.params.id);
 
-    // If the id is valid format but not found in DB
-    if (!car) return res.status(404).json({ error: "Car not found" });
+    if (!car) {
+      return res.status(404).json({ error: "Car not found" });
+    }
 
     return res.status(200).json(car);
-  } catch (err) {
-    // If the id format is invalid, Mongoose can throw
-    return res.status(400).json({ error: "Invalid id", details: err });
+  } catch (error) {
+    return res.status(400).json({
+      error: "Invalid id",
+      details: error
+    });
   }
 };
 
 /**
- * UPDATE - PUT /api/cars/:id
- * Updates a car by id. You can update any fields you send in JSON.
- */
-
-/**
  * @swagger
- * /api/cars/{id}:
+ * /api/v1/cars/{id}:
  *   put:
  *     summary: Update a car by id
  *     tags: [Cars]
@@ -131,7 +164,8 @@ export const getCarById = async (req: Request, res: Response) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -139,37 +173,53 @@ export const getCarById = async (req: Request, res: Response) => {
  *           schema:
  *             type: object
  *             properties:
- *               make: { type: string, example: Honda }
- *               model: { type: string, example: Civic }
- *               year: { type: integer, example: 2021 }
+ *               make:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *               year:
+ *                 type: integer
+ *               price:
+ *                 type: number
+ *               fuelType:
+ *                 type: string
  *     responses:
- *       200: { description: Updated }
- *       404: { description: Not found }
- *       400: { description: Validation error }
+ *       200:
+ *         description: Car updated
+ *       404:
+ *         description: Car not found
+ *       400:
+ *         description: Validation error
  */
 export const updateCar = async (req: Request, res: Response) => {
   try {
-    const updated = await Car.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,          // return the updated document
-      runValidators: true // IMPORTANT: re-run schema validation on update
+    // find first, then update and validate
+    // this follows the same kind of pattern used in class for PUT validation
+    const car = await Car.findById(req.params.id);
+
+    if (!car) {
+      return res.status(404).json({ error: "Car not found" });
+    }
+
+    // copy incoming values onto the existing document
+    car.set(req.body);
+
+    // force mongoose to validate the updated values before saving
+    await car.validate();
+    await car.save();
+
+    return res.status(200).json(car);
+  } catch (error) {
+    return res.status(400).json({
+      error: "Update failed",
+      details: error
     });
-
-    if (!updated) return res.status(404).json({ error: "Car not found" });
-
-    return res.status(200).json(updated);
-  } catch (err) {
-    return res.status(400).json({ error: "Update failed", details: err });
   }
 };
 
 /**
- * DELETE - DELETE /api/cars/:id
- * Deletes a car by id.
- */
-
-/**
  * @swagger
- * /api/cars/{id}:
+ * /api/v1/cars/{id}:
  *   delete:
  *     summary: Delete a car by id
  *     tags: [Cars]
@@ -177,20 +227,31 @@ export const updateCar = async (req: Request, res: Response) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     responses:
- *       204: { description: Deleted (no content) }
- *       404: { description: Not found }
+ *       204:
+ *         description: Car deleted
+ *       404:
+ *         description: Car not found
+ *       400:
+ *         description: Delete failed
  */
 export const deleteCar = async (req: Request, res: Response) => {
   try {
-    const deleted = await Car.findByIdAndDelete(req.params.id);
+    const car = await Car.findById(req.params.id);
 
-    if (!deleted) return res.status(404).json({ error: "Car not found" });
+    if (!car) {
+      return res.status(404).json({ error: "Car not found" });
+    }
 
-    // 204 = success, but no JSON body returned
+    await car.deleteOne();
+
     return res.status(204).send();
-  } catch (err) {
-    return res.status(400).json({ error: "Delete failed", details: err });
+  } catch (error) {
+    return res.status(400).json({
+      error: "Delete failed",
+      details: error
+    });
   }
 };
