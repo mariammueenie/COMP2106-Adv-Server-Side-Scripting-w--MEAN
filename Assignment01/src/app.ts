@@ -32,10 +32,18 @@ const swaggerOptions = {
     }
   },
   // include both src and dist so docs work during local dev and after build
-  apis: ["./src/controllers/*.ts", "./dist/controllers/*.js"]
+  // adding both versions of the path helps in case deployment resolves paths a little differently
+  apis: ["./src/controllers/*.ts", "src/controllers/*.ts", "./dist/controllers/*.js", "dist/controllers/*.js"]
 };
 
 const openApiSpecs = swaggerJsDoc(swaggerOptions);
+
+// temporary debug route for deployed testing
+// this lets us check whether swagger-jsdoc actually created the OpenAPI spec
+// if this route works but /api-docs is blank, then the issue is the Swagger UI page, not the spec data itself
+app.get("/api-docs-json", (_req: Request, res: Response) => {
+  res.json(openApiSpecs);
+});
 
 // swagger docs page
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpecs));
