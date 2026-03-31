@@ -66,7 +66,7 @@ Swagger docs:
     ```bash
     npm run build
 
-Example JSON (Car Info for DB)
+5. Example JSON (Car Info for DB)
     ```bash
     {
     "make": "Toyota",
@@ -79,10 +79,6 @@ Example JSON (Car Info for DB)
 ## Testing Results
 
 The following screenshots show the Cars API working locally in Thunder Client (VS Code) and Swagger.
-
-### 0. Swagger documentation page loaded successfully
-This screenshot shows the Swagger documentation interface for the Cars API running locally. It confirms that the application started successfully and that the POST, GET, PUT, and DELETE endpoints were registered and displayed correctly.
-![Swagger Docs](./screenshots/7-API-Check.png)
 
 ### 1. Swagger documentation loaded successfully
 ![Swagger Docs](./screenshots/7-API-Check.png)
