@@ -1,27 +1,64 @@
 import mongoose, { Schema } from "mongoose";
 
-// Mongoose schema = what a Car must look like in MongoDB
-const CarSchema = new Schema(
+// this interface gives TypeScript a clear shape for one car
+interface Car {
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  fuelType: string;
+}
+
+// defines what a car document should look like in MongoDB
+// assignment 1 only needs 3+ properties, but using 5 gives us a better base for assignment 2
+const carSchema = new Schema<Car>(
   {
-    // make of car: required string, trimmed, at least 2 characters
-    make: { type: String, required: true, trim: true, minlength: 2 },
+    // brand name, like Toyota or Honda
+    make: {
+      type: String,
+      required: [true, "Make is required"],
+      trim: true,
+      minlength: 2
+    },
 
-    // model of car: required string, trimmed
-    model: { type: String, required: true, trim: true, minlength: 1 },
+    // model name, like Corolla or Civic
+    model: {
+      type: String,
+      required: [true, "Model is required"],
+      trim: true,
+      minlength: 1
+    },
 
-    // year of car: required number with validation range
+    // basic year validation so nobody adds a car from year 20
     year: {
       type: Number,
-      required: true,
-      min: 1886, // first real car year
-      max: new Date().getFullYear() + 1 // allow next year's models
+      required: [true, "Year is required"],
+      min: 1886,
+      max: new Date().getFullYear() + 1
+    },
+
+    // simple positive number check for price
+    price: {
+      type: Number,
+      required: [true, "Price is required"],
+      min: 0
+    },
+
+    // keeping this as an enum helps prevent random inconsistent values
+    fuelType: {
+      type: String,
+      required: [true, "Fuel type is required"],
+      trim: true,
+      enum: ["Gasoline", "Diesel", "Hybrid", "Electric"]
     }
   },
   {
-    // timestamps adds createdAt and updatedAt automatically
+    // createdAt and updatedAt are useful for sorting and checking edits later
     timestamps: true
   }
 );
 
-// export the model so controllers can do Car.find(), Car.create(), etc.
-export default mongoose.model("Car", CarSchema);
+// this creates the Car model so controllers can call find, create, save, etc.
+const Car = mongoose.model<Car>("Car", carSchema);
+
+export default Car;
