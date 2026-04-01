@@ -1,1 +1,125 @@
-<p>edit-car works!</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Edit Car</h2>
+    <button class="btn btn-outline-dark" type="button" (click)="goBack()">Back to Cars</button>
+</div>
+
+@if (errorMessage) {
+<div class="alert alert-danger">
+    {{ errorMessage }}
+</div>
+}
+
+@if (successMessage) {
+<div class="alert alert-success">
+    {{ successMessage }}
+</div>
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h4 class="mb-3">Car Details</h4>
+
+        <form (ngSubmit)="updateCar()">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Make</label>
+                    <input type="text" class="form-control" name="make" [(ngModel)]="car.make" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Model</label>
+                    <input type="text" class="form-control" name="model" [(ngModel)]="car.model" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Year</label>
+                    <input type="number" class="form-control" name="year" [(ngModel)]="car.year" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Price</label>
+                    <input type="number" class="form-control" name="price" [(ngModel)]="car.price" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fuel Type</label>
+                    <select class="form-select" name="fuelType" [(ngModel)]="car.fuelType" required>
+                        <option value="Gasoline">Gasoline</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Electric">Electric</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-dark" type="submit">Update Car</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h4 class="mb-3">Add Service Record</h4>
+
+        <form (ngSubmit)="addServiceRecord()">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Service Type</label>
+                    <input type="text" class="form-control" name="newServiceType"
+                        [(ngModel)]="newServiceRecord.serviceType" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Service Date</label>
+                    <input type="date" class="form-control" name="newServiceDate"
+                        [(ngModel)]="newServiceRecord.serviceDate" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Cost</label>
+                    <input type="number" class="form-control" name="newServiceCost" [(ngModel)]="newServiceRecord.cost"
+                        required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" rows="3" name="newServiceNotes" [(ngModel)]="newServiceRecord.notes"
+                        required></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-dark" type="submit">Add Service Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h4 class="mb-3">Existing Service Records</h4>
+
+        @if (car.serviceRecords.length === 0) {
+        <div class="alert alert-secondary mb-0">
+            No service records yet.
+        </div>
+        }
+
+        @if (car.serviceRecords.length > 0) {
+        <div class="row g-3">
+            @for (record of car.serviceRecords; track $index) {
+            <div class="col-12">
+                <div class="border rounded p-3">
+                    <p class="mb-1"><strong>Service Type:</strong> {{ record.serviceType }}</p>
+                    <p class="mb-1"><strong>Service Date:</strong> {{ record.serviceDate }}</p>
+                    <p class="mb-1"><strong>Cost:</strong> ${{ record.cost }}</p>
+                    <p class="mb-0"><strong>Notes:</strong> {{ record.notes }}</p>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    </div>

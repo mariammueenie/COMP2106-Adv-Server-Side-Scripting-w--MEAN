@@ -1,1 +1,79 @@
-<p>add-car works!</p>
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h2 class="mb-4">Add Car</h2>
+
+        @if (errorMessage) {
+        <div class="alert alert-danger">
+            {{ errorMessage }}
+        </div>
+        }
+
+        <form (ngSubmit)="saveCar()">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Make</label>
+                    <input type="text" class="form-control" name="make" [(ngModel)]="car.make" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Model</label>
+                    <input type="text" class="form-control" name="model" [(ngModel)]="car.model" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Year</label>
+                    <input type="number" class="form-control" name="year" [(ngModel)]="car.year" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Price</label>
+                    <input type="number" class="form-control" name="price" [(ngModel)]="car.price" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fuel Type</label>
+                    <select class="form-select" name="fuelType" [(ngModel)]="car.fuelType" required>
+                        <option value="Gasoline">Gasoline</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Hybrid">Hybrid</option>
+                        <option value="Electric">Electric</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <h4 class="mb-3">Initial Service Record</h4>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Service Type</label>
+                    <input type="text" class="form-control" name="serviceType"
+                        [(ngModel)]="car.serviceRecords[0].serviceType">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Service Date</label>
+                    <input type="date" class="form-control" name="serviceDate"
+                        [(ngModel)]="car.serviceRecords[0].serviceDate">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Cost</label>
+                    <input type="number" class="form-control" name="serviceCost"
+                        [(ngModel)]="car.serviceRecords[0].cost">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" rows="3" name="serviceNotes"
+                        [(ngModel)]="car.serviceRecords[0].notes"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-dark" type="submit">Save Car</button>
+            </div>
+        </form>
+    </div>
+    </div>
